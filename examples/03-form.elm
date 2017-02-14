@@ -1,6 +1,6 @@
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onCheck, onClick, onInput)
 import Char exposing (isDigit, isLower, isUpper)
 
 
@@ -21,13 +21,14 @@ type alias Model =
   , password : String
   , passwordAgain : String
   , age : String
+  , agreementAccepted : Bool
   , showValidation: Bool
   }
 
 
 model : Model
 model =
-  Model "" "" "" "" False
+  Model "" "" "" "" False False
 
 
 
@@ -39,6 +40,7 @@ type Msg
     | Age String
     | Password String
     | PasswordAgain String
+    | AgreementAccepted Bool
     | Validate
 
 
@@ -58,6 +60,9 @@ update msg model =
     PasswordAgain password ->
       { newModel | passwordAgain = password }
 
+    AgreementAccepted acc ->
+      { newModel | agreementAccepted = acc }
+
     Validate ->
       { newModel | showValidation = True }
 
@@ -73,6 +78,8 @@ view model =
     , input [ type_ "text", placeholder "Age", onInput Age ] []
     , input [ type_ "password", placeholder "Password", onInput Password ] []
     , input [ type_ "password", placeholder "Re-enter Password", onInput PasswordAgain ] []
+    , input [ type_ "checkbox", id "agreement", onCheck AgreementAccepted ] []
+    , label [ for "agreement" ] [ text "Accept agreement" ]
     , button [ onClick Validate ] [ text "Submit!" ]
     , viewValidation model
     ]
@@ -107,6 +114,8 @@ viewValidation model =
           ("red", "Password is too simple!")
         else if model.password /= model.passwordAgain then
           ("red", "Passwords do not match!")
+        else if not model.agreementAccepted then
+          ("red", "You must accept the agreement!")
         else
           ("green", "OK")
     in
