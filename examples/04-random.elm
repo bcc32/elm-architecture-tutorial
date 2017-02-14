@@ -1,6 +1,7 @@
 import Html exposing (..)
 import Html.Events exposing (..)
 import Random
+import Char
 
 
 
@@ -59,9 +60,16 @@ subscriptions model =
 -- VIEW
 
 
+dieImage : Int -> Html Msg
+dieImage n =
+  -- unicode die face characters
+  let code = n + 9855 in
+  text (String.fromChar (Char.fromCode code))
+
+
 view : Model -> Html Msg
 view model =
   div []
-    [ h1 [] [ text (toString model.dieFace) ]
+    [ h1 [] [ dieImage model.dieFace ]
     , button [ onClick Roll ] [ text "Roll" ]
     ]
