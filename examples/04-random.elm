@@ -18,14 +18,12 @@ main =
 -- MODEL
 
 
-type alias Model =
-  { dieFace : Int
-  }
+type alias Model = (Int, Int)
 
 
 init : (Model, Cmd Msg)
 init =
-  (Model 1, Cmd.none)
+  ((1, 1), Cmd.none)
 
 
 
@@ -34,17 +32,18 @@ init =
 
 type Msg
   = Roll
-  | NewFace Int
+  | NewFace (Int, Int)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Roll ->
-      (model, Random.generate NewFace (Random.int 1 6))
+      let generator = Random.pair (Random.int 1 6) (Random.int 1 6) in
+      (model, Random.generate NewFace generator)
 
-    NewFace newFace ->
-      (Model newFace, Cmd.none)
+    NewFace pair ->
+      (pair, Cmd.none)
 
 
 
@@ -68,8 +67,8 @@ dieImage n =
 
 
 view : Model -> Html Msg
-view model =
+view (fst, snd) =
   div []
-    [ h1 [] [ dieImage model.dieFace ]
+    [ h1 [] [ dieImage fst, dieImage snd ]
     , button [ onClick Roll ] [ text "Roll" ]
     ]
