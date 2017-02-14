@@ -1,6 +1,6 @@
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import Char exposing (isDigit, isLower, isUpper)
 
 
@@ -21,12 +21,13 @@ type alias Model =
   , password : String
   , passwordAgain : String
   , age : String
+  , showValidation: Bool
   }
 
 
 model : Model
 model =
-  Model "" "" "" ""
+  Model "" "" "" "" False
 
 
 
@@ -38,22 +39,27 @@ type Msg
     | Age String
     | Password String
     | PasswordAgain String
+    | Validate
 
 
 update : Msg -> Model -> Model
 update msg model =
+  let newModel = { model | showValidation = False } in
   case msg of
     Name name ->
-      { model | name = name }
+      { newModel | name = name }
 
     Age age ->
-      { model | age = age }
+      { newModel | age = age }
 
     Password password ->
-      { model | password = password }
+      { newModel | password = password }
 
     PasswordAgain password ->
-      { model | passwordAgain = password }
+      { newModel | passwordAgain = password }
+
+    Validate ->
+      { newModel | showValidation = True }
 
 
 
@@ -67,6 +73,7 @@ view model =
     , input [ type_ "text", placeholder "Age", onInput Age ] []
     , input [ type_ "password", placeholder "Password", onInput Password ] []
     , input [ type_ "password", placeholder "Re-enter Password", onInput PasswordAgain ] []
+    , button [ onClick Validate ] [ text "Submit!" ]
     , viewValidation model
     ]
 
@@ -87,17 +94,20 @@ isSecurePassword input =
 
 viewValidation : Model -> Html msg
 viewValidation model =
-  let
-    (color, message) =
-      if not (isInt model.age) then
-        ("red", "Age is not a number!")
-      else if String.length model.password <= 8 then
-        ("red", "Password is too short!")
-      else if not (isSecurePassword model.password) then
-        ("red", "Password is too simple!")
-      else if model.password /= model.passwordAgain then
-        ("red", "Passwords do not match!")
-      else
-        ("green", "OK")
-  in
-    div [ style [("color", color)] ] [ text message ]
+  if not model.showValidation then
+    text ""
+  else
+    let
+      (color, message) =
+        if not (isInt model.age) then
+          ("red", "Age is not a number!")
+        else if String.length model.password <= 8 then
+          ("red", "Password is too short!")
+        else if not (isSecurePassword model.password) then
+          ("red", "Password is too simple!")
+        else if model.password /= model.passwordAgain then
+          ("red", "Passwords do not match!")
+        else
+          ("green", "OK")
+    in
+      div [ style [("color", color)] ] [ text message ]
