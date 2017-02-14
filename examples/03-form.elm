@@ -19,12 +19,13 @@ type alias Model =
   { name : String
   , password : String
   , passwordAgain : String
+  , age : String
   }
 
 
 model : Model
 model =
-  Model "" "" ""
+  Model "" "" "" ""
 
 
 
@@ -33,6 +34,7 @@ model =
 
 type Msg
     = Name String
+    | Age String
     | Password String
     | PasswordAgain String
 
@@ -42,6 +44,9 @@ update msg model =
   case msg of
     Name name ->
       { model | name = name }
+
+    Age age ->
+      { model | age = age }
 
     Password password ->
       { model | password = password }
@@ -58,17 +63,27 @@ view : Model -> Html Msg
 view model =
   div []
     [ input [ type_ "text", placeholder "Name", onInput Name ] []
+    , input [ type_ "text", placeholder "Age", onInput Age ] []
     , input [ type_ "password", placeholder "Password", onInput Password ] []
     , input [ type_ "password", placeholder "Re-enter Password", onInput PasswordAgain ] []
     , viewValidation model
     ]
 
 
+isInt : String -> Bool
+isInt input =
+  case String.toInt input of
+    Ok _ -> True
+    Err _ -> False
+
+
 viewValidation : Model -> Html msg
 viewValidation model =
   let
     (color, message) =
-      if String.length model.password <= 8 then
+      if not (isInt model.age) then
+        ("red", "Age is not a number!")
+      else if String.length model.password <= 8 then
         ("red", "Password is too short!")
       else if model.password /= model.passwordAgain then
         ("red", "Passwords do not match!")
