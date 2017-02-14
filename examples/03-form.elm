@@ -1,6 +1,7 @@
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Char exposing (isDigit, isLower, isUpper)
 
 
 main =
@@ -77,6 +78,13 @@ isInt input =
     Err _ -> False
 
 
+isSecurePassword : String -> Bool
+isSecurePassword input =
+     String.any isDigit input
+  && String.any isLower input
+  && String.any isUpper input
+
+
 viewValidation : Model -> Html msg
 viewValidation model =
   let
@@ -85,6 +93,8 @@ viewValidation model =
         ("red", "Age is not a number!")
       else if String.length model.password <= 8 then
         ("red", "Password is too short!")
+      else if not (isSecurePassword model.password) then
+        ("red", "Password is too simple!")
       else if model.password /= model.passwordAgain then
         ("red", "Passwords do not match!")
       else
