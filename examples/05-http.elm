@@ -22,12 +22,13 @@ main =
 type alias Model =
   { topic : String
   , gifUrl : String
+  , error : Maybe Http.Error
   }
 
 
 init : String -> (Model, Cmd Msg)
 init topic =
-  ( Model topic "waiting.gif"
+  ( Model topic "waiting.gif" Nothing
   , getRandomGif topic
   )
 
@@ -45,17 +46,37 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     MorePlease ->
-      (model, getRandomGif model.topic)
+      ({ model | error = Nothing }, getRandomGif model.topic)
 
     NewGif (Ok newUrl) ->
-      (Model model.topic newUrl, Cmd.none)
+      (Model model.topic newUrl Nothing, Cmd.none)
 
-    NewGif (Err _) ->
-      (model, Cmd.none)
+    NewGif (Err e) ->
+      ({ model | error = Just e }, Cmd.none)
 
 
 
 -- VIEW
+
+
+maybeError : Maybe Http.Error -> Html Msg
+maybeError me =
+  case me of
+    Nothing -> div [ hidden True ] []
+    Just e ->
+      let errorText =
+        case e of
+          Http.BadUrl u -> "Bad url " ++ u
+          Http.Timeout -> "Timeout"
+          Http.NetworkError -> "Network Error"
+          Http.BadStatus response ->
+            "Bad status: "
+              ++ toString response.status.code
+              ++ " "
+              ++ response.status.message
+          Http.BadPayload s _ -> "Bad payload: " ++ s
+      in
+      div [] [ text errorText ]
 
 
 view : Model -> Html Msg
@@ -64,6 +85,7 @@ view model =
     [ h2 [] [text model.topic]
     , button [ onClick MorePlease ] [ text "More Please!" ]
     , br [] []
+    , maybeError model.error
     , img [src model.gifUrl] []
     ]
 
