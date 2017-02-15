@@ -84,10 +84,22 @@ maybeError me =
       div [] [ text errorText ]
 
 
+onChangeNewTopic : Html.Attribute Msg
+onChangeNewTopic =
+  let decoder =
+    Decode.at ["target", "value"] Decode.string
+    |> Decode.map NewTopic
+  in
+  on "change" decoder
+
 view : Model -> Html Msg
 view model =
   div []
     [ h2 [] [text model.topic]
+    , select [ onChangeNewTopic ]
+      [ option [ value "cats" ] [ text "Cats" ]
+      , option [ value "pokemon" ] [ text "Pokemon" ]
+      ]
     , input [ placeholder "Topic", onInput NewTopic ] []
     , button [ onClick MorePlease ] [ text "More Please!" ]
     , br [] []
